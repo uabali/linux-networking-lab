@@ -1,38 +1,35 @@
 # linux-networking-lab
 
-Hands-on notes and demos for **Linux isolation & networking primitives** that distributed systems actually sit on: namespaces, cgroups, iptables/nftables, and a light touch of eBPF.
+Notes and demos for Linux isolation and networking: namespaces, cgroups, iptables/nftables, and a light eBPF pass.
 
-> **Target audience:** engineers aiming at Distributed Systems / infra roles (fal-style).  
-> **Host caveat:** Umut’s laptop is **macOS**. Real cgroups v2, network namespaces, nftables, and eBPF need a **Linux kernel**. On Mac we run demos inside a privileged Ubuntu container via Docker Desktop.
+**Host note:** on macOS, demos run inside a privileged Ubuntu container (real cgroups v2 / netns / nft / eBPF need a Linux kernel).
 
-## What you learn
-
-| Topic | Why it matters in DS |
-|-------|----------------------|
-| Namespaces | Pod/container isolation; “same PID 1, different view of the machine” |
-| cgroups | CPU/mem/IO limits → noisy-neighbor control, autoscaling signals |
-| iptables/nftables | Service mesh datapath ancestors; kube-proxy, CNI, egress policy |
-| eBPF | Modern observability + policy without rewriting the kernel |
-
-## Repo layout
+## Layout
 
 ```
-notes/          # engineer-facing explainers (ne / neden / nasıl / ne görürsün)
-demos/          # shell demos + Dockerfile (Linux-only)
+notes/          # explainers
+demos/          # shell demos + Dockerfile
 Makefile        # make demo-* shortcuts
 ```
 
+## Topics
+
+| Topic | Role |
+|-------|------|
+| Namespaces | Process / net / mount isolation (container view of the machine) |
+| cgroups | CPU / mem / IO limits |
+| iptables / nftables | Packet filter and NAT datapath |
+| eBPF | Kernel observability / policy without rewriting the kernel |
+
 ## Prerequisites
 
-- Docker Desktop (or any Docker engine that can run Linux containers)
-- ~1 GB disk for the lab image
-- Willingness to use `--privileged` **only for local learning** (see Security)
+- Docker (Linux containers)
+- ~1 GB for the lab image
 
 ```bash
-# from this repo
-make image          # build lab image
-make demo-all       # run all demos in one privileged container
-# or individually:
+make image
+make demo-all
+# or:
 make demo-netns
 make demo-cgroup
 make demo-firewall
@@ -43,22 +40,22 @@ make demo-ebpf
 
 | Capability | macOS host | Linux host / Docker Linux VM |
 |------------|------------|------------------------------|
-| `unshare`, `ip netns` | No (or incomplete) | Yes |
-| cgroups v2 controllers | No | Yes (`/sys/fs/cgroup`) |
-| iptables / nftables | No kernel tables | Yes |
-| eBPF / bpftrace / bcc | No | Yes (needs kernel headers + CAP_BPF/privileged) |
+| `unshare`, `ip netns` | No | Yes |
+| cgroups v2 | No | Yes (`/sys/fs/cgroup`) |
+| iptables / nftables | No | Yes |
+| eBPF / bpftrace / bcc | No | Yes |
 
-On Mac, **always** go through `make demo-*`. See `notes/mac-vs-linux.md`.
+On Mac use `make demo-*`. Details: `notes/mac-vs-linux.md`.
 
-## Security warning
+## Security
 
-Demos use `docker run --privileged` so they can create namespaces, mount cgroupfs, load bpf, and poke netfilter. That gives the container near-host kernel power **inside Docker Desktop’s Linux VM**.
+Demos use `docker run --privileged` (namespaces, cgroupfs, bpf, netfilter).
 
-- Do **not** run these scripts on a shared prod host.
-- Do **not** expose the container’s network to untrusted traffic.
-- Tear down with `docker rm -f` when done; do not leave privileged shells open.
+- Do not run on a shared prod host.
+- Do not expose the container to untrusted traffic.
+- Tear down with `docker rm -f` when done.
 
-## Quick start (one shot)
+## Quick start
 
 ```bash
 git clone https://github.com/uabali/linux-networking-lab.git
@@ -67,8 +64,8 @@ make image
 make demo-all
 ```
 
-Expected: each demo prints a clear `=== BEGIN/END ===` section with commands, observations, and cleanup.
+Each demo prints `=== BEGIN/END ===` with commands, observations, and cleanup.
 
 ## License
 
-MIT — learning material. Use at your own risk.
+MIT
