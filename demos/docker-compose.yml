@@ -1,0 +1,16 @@
+# Local learning only — privileged.
+services:
+  lab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: linux-networking-lab:local
+    privileged: true
+    pid: host
+    volumes:
+      - ../notes:/lab/notes:ro
+      - ./:/lab/demos:ro
+    working_dir: /lab
+    stdin_open: true
+    tty: true
+    command: ["bash", "-lc", "demos/run-all.sh"]
